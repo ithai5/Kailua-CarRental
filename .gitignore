@@ -12,3 +12,5 @@ log/Snapshot.1
 log/Version_Number
 
 lib/mysql-connector-java-8.0.19.jar
+
+lib/mysql-connector.jar
