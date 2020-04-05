@@ -14,3 +14,11 @@ log/Version_Number
 lib/mysql-connector-java-8.0.19.jar
 
 lib/mysql-connector.jar
+
+src/Main.java
+
+SQL/Query for searching between dates.sql
+
+SQL/creating tables Car rentalContract.sql
+
+*.sql
