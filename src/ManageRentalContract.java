@@ -1,3 +1,8 @@
+/*
+This class has been created by Itai Gramse. this class should take care about renting a car in a car-rental company. you can find here
+interaction between the java code to the database on mysql.
+this code is part of a project to kea copenhagen academy.
+ */
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -149,7 +154,7 @@ public class ManageRentalContract {
         //" VALUES (" + startRent + "', '"+ endRent + "', " + kmLimit + ", " + startKm + ", '" + licencePlate + "', " + customer_id + ","  + finalPrice + ")";
         DBInteraction.updateDatabase(updateQuery);
     }
-    
+
         public static String collectDateInfo(String request)
         {
             System.out.println("Please state the " + request +  " day of rental");
