@@ -1,11 +1,14 @@
+/*
+    this class should handle interaction with MySQL Database.this class has been created by Itai Gramse, as a part of project at kea university. this c
+ */
 import java.sql.*;
 
-public class DBInteraction{
+public class DBinteraction{
     private static String user;
     private static String password;
     private static String address;
 
-    public DBInteraction (String user, String password,String address)
+    public DBinteraction (String user, String password,String address)
     {
         this.user = user;
         this.password = password;
@@ -19,7 +22,6 @@ public class DBInteraction{
             Connection connection = DriverManager.getConnection(address,user,password );
             Statement statement = connection.createStatement();
             ResultSet rs = statement.executeQuery(query);
-            connection.close();
             return rs;
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
@@ -34,7 +36,6 @@ public class DBInteraction{
             Connection connection = DriverManager.getConnection(address,user,password);
             Statement statement = connection.createStatement();
             int  result = statement.executeUpdate(query);
-            connection.close();
             return result;
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
