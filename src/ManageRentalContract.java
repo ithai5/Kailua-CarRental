@@ -30,20 +30,19 @@ public class ManageRentalContract {
 
     //return result set of available cars between two dates
     public static ResultSet availableCars(String startDate, String endDate, String className){
-        String query = "SELECT licencePlate, startDate, endDate,brand, model, className " +
-                "FROM KeaProject.CarInfo " +
-                "LEFT JOIN KeaProject.RentalContract USING (licencePlate) " +
-                "JOIN KeaProject .Specs USING (specs_id) " +
-                "JOIN KeaProject.ClassType USING (className_id) " +
-                "WHERE NOT startDate >= '" + startDate +"' AND endDate <= '" + endDate + "' AND className LIKE '%"+ className +"' " +
-                "UNION " +
-                "SELECT licencePlate, startDate, endDate,brand, model, className " +
-                "FROM KeaProject.CarInfo " +
-                "LEFT JOIN KeaProject.RentalContract USING (licencePlate) " +
-                "JOIN KeaProject .Specs USING (specs_id) " +
-                "JOIN KeaProject.ClassType USING (className_id) " +
-                "WHERE startDate IS NULL AND className LIKE '%"+ className +"' "+
-                "GROUP BY licencePlate";
+        String query = "SELECT licencePlate, brand, model, className " +
+                "FROM Specs AS b " +
+                "JOIN " +
+                    "(SELECT CarInfo.licencePlate, startDate, endDate, rentalContract_id, CarInfo.specs_id " +
+                    "FROM KeaProject.CarInfo AS a " +
+                    "JOIN KeaProject.RentalContract ON a.licencePlate= RentalContract.licencePlate " +
+                        "AND ((startDate >= '" + startDate + "' AND endDate <= '" + endDate + "') " +
+                        "OR (startDate<='" + endDate + "' AND endDate>= '" + startDate + "')) " +
+                "RIGHT JOIN CarInfo ON a.licencePlate = CarInfo.licencePlate " +
+                "WHERE rentalContract_id IS NULL) AS c " +
+                "ON b.specs_id = c.specs_id  " +
+                "JOIN KeaProject.ClassType AS d " +
+                "ON b.className_id = d.className_id AND className LIKE '%" + className + "'";
         ResultSet rs = DBInteraction.getData(query);
         System.out.printf("%-8s%-17s%-15s%-15s%-15s\n","Num","Licence", "Brand", "Model","Class");
         System.out.println("____________________________________________________________________");
