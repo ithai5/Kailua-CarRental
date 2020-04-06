@@ -36,8 +36,9 @@ public class ManageRentalContract {
                     "(SELECT CarInfo.licencePlate, startDate, endDate, rentalContract_id, CarInfo.specs_id " +
                     "FROM KeaProject.CarInfo AS a " +
                     "JOIN KeaProject.RentalContract ON a.licencePlate= RentalContract.licencePlate " +
-                        "AND ((startDate >= '" + startDate + "' AND endDate <= '" + endDate + "') " +
-                        "OR (startDate<='" + endDate + "' AND endDate>= '" + startDate + "')) " +
+                        "AND ((startDate >= '" + startDate + "' AND startDate <= '" + endDate + "') " +
+                        "OR(endDate >= '" + startDate + "' AND endDate <= '" + endDate + "') " +
+                        "OR (startDate >= '" + startDate +"' AND endDate <= '" + endDate + "')) " +
                 "RIGHT JOIN CarInfo ON a.licencePlate = CarInfo.licencePlate " +
                 "WHERE rentalContract_id IS NULL) AS c " +
                 "ON b.specs_id = c.specs_id  " +
