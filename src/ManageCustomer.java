@@ -44,16 +44,15 @@ public class ManageCustomer {
     }
 
     public static void printCustomerList() throws SQLException {
-        ResultSet listToPrint = DBInteraction.getData("SELECT Customer.customer_id, Customer.firstName, Customer.lastName FROM Customer");
-
+        ResultSet listToPrint = getCustomerList();
+        int i = 0;
         while(listToPrint.next()) {
-            String cusId = "[" + listToPrint.getInt(1) + "].";
+            String cusId = "[" + ++i + "].";
             String fName = listToPrint.getString(2);
             String lName = listToPrint.getString(3);
             System.out.printf("%-5s%-10s%-10s", cusId, fName, lName);
             System.out.println();
         }
-
     }
 
     public static String deleteCustomerQuery() throws SQLException {
@@ -67,13 +66,21 @@ public class ManageCustomer {
         String field = getField(fieldName);
         String queryId = "SELECT Customer.customer_id\nFROM Customer\nWHERE " + field + " = \"" + searchParam + "\";";
         ResultSet rs = DBInteraction.getData(queryId);
+
         rs.next();
         return rs.getInt(1);
     }
 
     public static int getCustomerById() throws SQLException {
         printCustomerList();
-        return findCustomerId(0, "" + ScannerReader.scannerInt(1, tableSize("Customer")));
+        int cusNumber = ScannerReader.scannerInt(1, tableSize("Customer"));
+        ResultSet cusList = getCustomerList();
+
+        for (int i = 0; i < cusNumber; ++i) {
+            cusList.next();
+        }
+
+        return cusList.getInt(1);
     }
 
     public static String getField(int fieldName) {
@@ -95,5 +102,9 @@ public class ManageCustomer {
         ResultSet size = DBInteraction.getData("SELECT COUNT(*)\nFROM " + table);
         size.next();
         return size.getInt(1);
+    }
+
+    public static ResultSet getCustomerList() {
+        return DBInteraction.getData("SELECT Customer.customer_id, Customer.firstName, Customer.lastName FROM Customer");
     }
 }
