@@ -5,9 +5,51 @@ this code is part of a project to kea copenhagen academy.
  */
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.Scanner;
 
 public class ManageRentalContract {
     //for minimize the option, can be added where to the query
+    public static String searchInTable(){
+        System.out.println("what would you like to search by?" +
+                "\n[1] First Name" +
+                "\n[2] Last Name" +
+                "\n[3] Start Date" +
+                "\n[4] End Date" +
+                "\n[5] Car Licence Plate" +
+                "\n[0] return to the menu");
+        String searchTerm = "";
+        int userType = ScannerReader.scannerInt(0,5);
+        switch (userType) {
+            case 0:
+                return null;
+            case 1:
+                System.out.println("Please type your search");
+                searchTerm = "Where firstName LIKE '" + ScannerReader.scannerAll() + "'";
+                break;
+            case 2:
+                System.out.println("Please type your search");
+                searchTerm = "Where lastName LIKE '" + ScannerReader.scannerAll() + "'";
+                break;
+            case 3:
+                System.out.println("Please type your search");
+                searchTerm = "Where startDate ='" + collectDateInfo("search of") + "'";
+                break;
+            case 4:
+                System.out.println("Please type your search");
+                searchTerm = "Where endDate ='" + collectDateInfo("search of") + "'";
+                break;
+            case 5:
+                System.out.println("Please type your search");
+                searchTerm = "Where licence plate ='" + ScannerReader.scannerAll() + "'";
+                break;
+            default:
+                break;
+        }
+        return searchTerm;
+    }
+
     public static void viewRentalContract(String whereQuery)
     {
         ResultSet rs = DBInteraction.getData("SELECT Customer.firstName, Customer.lastName, RentalContract.startDate, RentalContract.endDate, CarInfo.licencePlate, Specs.brand, Specs.model,ClassType.className " + "" +
@@ -78,6 +120,21 @@ public class ManageRentalContract {
         return pricePerDay;
     }
 
+    public static int findPricePerDay(String licencePlate){
+        ResultSet rs = DBInteraction.getData("SELECT pricePerDay "+
+                "FROM CarInfo "+
+                "JOIN Specs USING (specs_id) "+
+                "JOIN ClassType USING (className_id) "+
+                "WHERE licencePlate LIKE '" + licencePlate + "'");
+        try {
+            while (rs.next()) {
+                return (rs.getInt("pricePerDay"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
     public static String findKmInCar(String licencePlate){
         String query = "SELECT odometer " +
                 "FROM KeaProject.CarInfo " +
@@ -122,8 +179,12 @@ public class ManageRentalContract {
         }
         String startRent= collectDateInfo("start");
         String endRent = collectDateInfo("end");
+        String startRental = Calendar.convertDate(startRent);
+        String endRental = Calendar.convertDate(endRent);
+        int daysBetween =  Calendar.daysInBetween(startRental,endRental);
         ResultSet rs = availableCars(startRent,endRent,carClass);
         if (rs == null){
+            System.out.println("There is no available car");
             return;
         }
         String licencePlate ="";
@@ -136,14 +197,24 @@ public class ManageRentalContract {
             e.printStackTrace();
         }
         System.out.println("would you like to have km limitation?");
-        String kmLimit = "null";
+        String kmLimit = "NULL";
         boolean bool = ScannerReader.scannerBoolean(3);
         if (bool) {
             System.out.println("how many km would you like to have ?");
             kmLimit = ScannerReader.scannerInt(1, 1000) + "";
         }
+        System.out.println("are you a customer?" +
+                "\n[1] Yes" +
+                "\n[2] No");
+        if (ScannerReader.scannerBoolean(3)){
+            // call thomas method to search
+        }
+        else{
+            //call thomas method to create
+        }
         String customer_id = "6";//choose customer_id
-        int finalPrice = 0;//some math for making the total price
+        int pricePerDay = findPricePerDay(licencePlate);
+        int finalPrice = daysBetween*pricePerDay;//some math for making the total price
         startRent = "'"+ startRent +" 00:00:00'";
         endRent = "'"+ endRent +" 00:00:00'";
         String startKm =  findKmInCar(licencePlate);
@@ -154,6 +225,7 @@ public class ManageRentalContract {
         //" VALUES (" + startRent + "', '"+ endRent + "', " + kmLimit + ", " + startKm + ", '" + licencePlate + "', " + customer_id + ","  + finalPrice + ")";
         DBInteraction.updateDatabase(updateQuery);
     }
+
 
         public static String collectDateInfo(String request)
         {
