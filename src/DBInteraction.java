@@ -3,12 +3,12 @@
  */
 import java.sql.*;
 
-public class DBinteraction{
+class DBInteraction{
     private static String user;
     private static String password;
     private static String address;
 
-    public DBinteraction (String user, String password,String address)
+    public DBInteraction (String user, String password,String address)
     {
         this.user = user;
         this.password = password;
