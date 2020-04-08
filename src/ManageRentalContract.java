@@ -42,7 +42,7 @@ public class ManageRentalContract {
                 break;
             case 5:
                 System.out.println("Please type your search");
-                searchTerm = "Where licence plate ='" + ScannerReader.scannerAll() + "'";
+                searchTerm = "Where licence plate LIKE '" + ScannerReader.scannerAll() + "'";
                 break;
             default:
                 break;
@@ -50,7 +50,8 @@ public class ManageRentalContract {
         return searchTerm;
     }
 
-    public static void viewRentalContract(String whereQuery)
+    //show contract table, can add where query for minimize the results
+    public static ResultSet viewRentalContract(String whereQuery)
     {
         ResultSet rs = DBInteraction.getData("SELECT Customer.firstName, Customer.lastName, RentalContract.startDate, RentalContract.endDate, CarInfo.licencePlate, Specs.brand, Specs.model,ClassType.className " + "" +
                 "FROM KeaProject.RentalContract " +
@@ -59,15 +60,22 @@ public class ManageRentalContract {
                 "INNER JOIN KeaProject.Specs ON Specs.specs_id = CarInfo.specs_id " +
                 "INNER JOIN KeaProject.ClassType ON Specs.className_id = ClassType.className_id " +
                 whereQuery);
-        System.out.printf("%-20s%-25s%-25s%-15s%-15s%-10s%-10s\n","Name","Start Rental","End Rental","Licence Num","Brand","Model","Class");
+        System.out.printf("%-5s%-20s%-25s%-25s%-15s%-15s%-10s%-10s\n","Num","Name","Start Rental","End Rental","Licence Num","Brand","Model","Class");
         System.out.println("___________________________________________________________________________________________________________");
         try {
+            int i = 0;
             while (rs.next()){
-                System.out.printf("%-20s%-25s%-25s%-15s%-15s%-10s%-10s\n",rs.getString("firstName")+ " " + rs.getString("lastName"),rs.getString("startDate"),rs.getString("endDate"),rs.getString("licencePlate"),rs.getString("brand"),rs.getString("model"),rs.getString("className"));
+                i++;
+                System.out.printf("%-5s%-20s%-25s%-25s%-15s%-15s%-10s%-10s\n","["+i+"]",rs.getString("firstName")+ " " + rs.getString("lastName"),rs.getString("startDate"),rs.getString("endDate"),rs.getString("licencePlate"),rs.getString("brand"),rs.getString("model"),rs.getString("className"));
             }
         }catch (SQLException e) {
             e.printStackTrace();
         }
+        return rs;
+    }
+
+    public static void updateRentalContract(){
+        
     }
 
     //return result set of available cars between two dates
@@ -105,6 +113,7 @@ public class ManageRentalContract {
         }
         return rs;
     }
+    /*
     public int priceType (String className){
         String query = "SELECT pricePerDay " +
                 "FROM KeaProject.ClassType " +
@@ -120,6 +129,9 @@ public class ManageRentalContract {
         return pricePerDay;
     }
 
+
+     */
+    //find the price per day by entring the licencePlate of a car
     public static int findPricePerDay(String licencePlate){
         ResultSet rs = DBInteraction.getData("SELECT pricePerDay "+
                 "FROM CarInfo "+
@@ -135,6 +147,8 @@ public class ManageRentalContract {
         }
         return 0;
     }
+
+    //find the odometer of a car
     public static String findKmInCar(String licencePlate){
         String query = "SELECT odometer " +
                 "FROM KeaProject.CarInfo " +
@@ -150,6 +164,7 @@ public class ManageRentalContract {
         }
         return null;
     }
+    public static void searchRentalContract(){}
 
     //this class will be called from the menu class for handle car rent
     public static void rentCarMenu()
