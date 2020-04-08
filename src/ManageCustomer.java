@@ -6,7 +6,11 @@ public class ManageCustomer {
     }
 
     public static String quoteForString(String value, boolean withComma) {
-        return withComma ? "\"" + value + "\", " : "\"" + value + "\"";
+        if (withComma) {
+            return "\"" + value + "\", ";
+        } else {
+            return "\"" + value + "\"";
+        }
     }
 
     public static String newCustomerQuery() {
@@ -19,14 +23,15 @@ public class ManageCustomer {
         System.out.print("Which e-mail would the customer like to be contacted on?: ");
         String email = ScannerReader.scannerEMail();
         System.out.println();
-        String var10000 = quoteForString(firstName, true);
-        String newCustomer = "INSERT INTO KeaProject.Customer (firstName, lastName, email)\nVALUES (" + var10000 + quoteForString(lastName, true) + quoteForString(email, false) + ");";
+        String newCustomer = "INSERT INTO KeaProject.Customer (firstName, lastName, email)\nVALUES (" +
+                quoteForString(firstName, true) + quoteForString(lastName, true) + quoteForString(email, false) + ");";
         return newCustomer;
     }
 
     public static String updateCustomerQuery() throws SQLException {
         System.out.println("Which customer's details would you like to change?");
-        int customerId = getCustomerById();
+        printCustomerList();
+        int customerId = getCustomerById(ScannerReader.scannerInt(1, tableSize("Customer")));
         System.out.println("What information would you like to update?\n[1]. First name\n[2]. Last name\n[3]. E-mail address");
         int choice = ScannerReader.scannerInt(1, 3);
         String field = getField(choice);
@@ -37,8 +42,8 @@ public class ManageCustomer {
         } else {
             changedInfo = quoteForString(ScannerReader.scannerWords(), false);
         }
-
         System.out.println();
+
         String updateQuery = "UPDATE Customer\nSET " + field + " = " + changedInfo + "\nWHERE Customer.customer_id = " + customerId + ";";
         return updateQuery;
     }
@@ -57,7 +62,9 @@ public class ManageCustomer {
 
     public static String deleteCustomerQuery() throws SQLException {
         System.out.println("Which customer would you like to remove from the database?");
-        int customerId = getCustomerById();
+        printCustomerList();
+        int customerId = getCustomerById(ScannerReader.scannerInt(1, tableSize("Customer")));
+
         String deleteQuery = "DELETE FROM Customer WHERE Customer.customer_id = " + customerId;
         return deleteQuery;
     }
@@ -71,14 +78,10 @@ public class ManageCustomer {
         return rs.getInt(1);
     }
 
-    public static int getCustomerById() throws SQLException {
-        printCustomerList();
-        int cusNumber = ScannerReader.scannerInt(1, tableSize("Customer"));
-        ResultSet cusList = getCustomerList();
 
-        for (int i = 0; i < cusNumber; ++i) {
-            cusList.next();
-        }
+    public static int getCustomerById(int cusNumber) throws SQLException {
+        ResultSet cusList = getCustomerList();
+        cusList.absolute(cusNumber);
 
         return cusList.getInt(1);
     }
