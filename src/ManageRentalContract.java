@@ -75,7 +75,7 @@ public class ManageRentalContract {
     }
 
     public static void updateRentalContract(){
-        
+
     }
 
     //return result set of available cars between two dates
@@ -164,17 +164,13 @@ public class ManageRentalContract {
         }
         return null;
     }
-    public static void searchRentalContract(){}
-
-    //this class will be called from the menu class for handle car rent
-    public static void rentCarMenu()
-    {
+    public static String chooseCarType(){
         System.out.println("Which car type would you like to rent ?\n" + "[1] Family \n" + "[2] Sport \n" + "[3] Luxury \n" + "[4] Show all options\n" + "[0] cancel ");
-        String carClass;
+        String carClass = "";
         int userInput = ScannerReader.scannerInt(0, 4);
         switch (userInput) {
             case 0:
-                return;
+                break;
             case 1:
                 carClass = "Family";
                 break;
@@ -189,15 +185,23 @@ public class ManageRentalContract {
                 break;
             default:
                 System.out.println("Something went wrong");
-                return;
+                return "";
 
         }
+    return carClass;
+    }
+
+    //this class will be called from the menu class for handle car rent
+    public static void rentCarMenu()
+    {
+        String carClass = chooseCarType();
         String startRent= collectDateInfo("start");
         String endRent = collectDateInfo("end");
         String startRental = Calendar.convertDate(startRent);
         String endRental = Calendar.convertDate(endRent);
         int daysBetween =  Calendar.daysInBetween(startRental,endRental);
         ResultSet rs = availableCars(startRent,endRent,carClass);
+        int userInput;
         if (rs == null){
             System.out.println("There is no available car");
             return;
@@ -221,13 +225,25 @@ public class ManageRentalContract {
         System.out.println("are you a customer?" +
                 "\n[1] Yes" +
                 "\n[2] No");
-        if (ScannerReader.scannerBoolean(3)){
-            // call thomas method to search
+        String customer_id = "";
+        while (customer_id.length()==0) {
+            System.out.println("are you a customer?" +
+                    "\n[1] Yes" +
+                    "\n[2] No");
+            if (ScannerReader.scannerBoolean(3)) {
+                // call thomas method to search
+                System.out.println("please Type your eMail address");
+                String email = ScannerReader.scannerEMail();
+                try {
+                    ManageCustomer.findCustomerId(3,email);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+            else {
+                //call thomas method to create
+            }
         }
-        else{
-            //call thomas method to create
-        }
-        String customer_id = "6";//choose customer_id
         int pricePerDay = findPricePerDay(licencePlate);
         int finalPrice = daysBetween*pricePerDay;//some math for making the total price
         startRent = "'"+ startRent +" 00:00:00'";
