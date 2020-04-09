@@ -92,7 +92,7 @@ public class DriverInfo {
     {
 
         System.out.println("Please type driver's licence number of the driver you wish to delete");
-        String driverLicenceNumber = ScannerReader.scannerIntAsString(20);
+        int driverLicenceNumber = ScannerReader.scannerInt();
 
         String query = "DELETE FROM KeaProject.DriverInfo WHERE driverLicenceNumber = " + driverLicenceNumber;
         int result = DBInteraction.updateDatabase(query);
@@ -109,7 +109,7 @@ public class DriverInfo {
     public static void updateDriver () //got rid of return queries
     {
         System.out.println("Please type driver's licence number of the driver you wish to update");
-        String licence = ScannerReader.scannerWords();
+        int licence = ScannerReader.scannerInt();
         String query = null;
         System.out.println("what would you like to change:\n" +
                 "[1] Licence Number\n"+
@@ -127,65 +127,55 @@ public class DriverInfo {
                 return;
             case 1:
                 System.out.println("Please type the new licence number ");
-                newValue = ScannerReader.scannerWords();
-                //return "UPDATE  KeaProject.DriverInfo SET driverLicenceNumber = '" + newValue + "' WHERE DriverLicenceNumber = " + licence;
-                query = "UPDATE  KeaProject.DriverInfo SET driverLicenceNumber = '" + newValue + "' WHERE DriverLicenceNumber = " + licence;
-                DBInteraction.updateDatabase(query);
+                int newNumber = ScannerReader.scannerInt();
+                query = "UPDATE  KeaProject.DriverInfo SET driverLicenceNumber = '" + newNumber + "' WHERE DriverLicenceNumber = " + licence;
                 break;
             case 2:
                 System.out.println("Please type the new first name");
                 newValue = ScannerReader.scannerWords();
-                //return "UPDATE  KeaProject.DriverInfo SET driverFirstName = '" + newValue + "' WHERE DriverLicenceNumber = " + licence;
                 query = "UPDATE  KeaProject.DriverInfo SET driverFirstName = '" + newValue + "' WHERE DriverLicenceNumber = " + licence;
-                DBInteraction.updateDatabase(query);
                 break;
             case 3:
                 System.out.println("Please type the new last name");
                 newValue = ScannerReader.scannerWords();
-                //return "UPDATE  KeaProject.DriverInfo SET driverLastName = '" + newValue + "' WHERE DriverLicenceNumber = " + licence;
                 query = "UPDATE  KeaProject.DriverInfo SET driverLastName = '" + newValue + "' WHERE DriverLicenceNumber = " + licence;
-                DBInteraction.updateDatabase(query);
                 break;
             case 4:
-                System.out.println("Please type the Driver Since date you wish to change to");
-                int newDate = ScannerReader.scannerInt();
-                //return "UPDATE  KeaProject.DriverInfo SET driverSinceDate = '" + newDate + "' WHERE DriverLicenceNumber = " + licence;
-                query = "UPDATE  KeaProject.DriverInfo SET driverSinceDate = '" + newDate + "' WHERE DriverLicenceNumber = " + licence;
-                DBInteraction.updateDatabase(query);
+                System.out.println("Please type the Driver Since date you wish to change to. Please type date in YYYY-MM-DD format");
+                newValue = ScannerReader.scannerAll();
+                query = "UPDATE  KeaProject.DriverInfo SET driverSinceDate = '" + newValue + "' WHERE DriverLicenceNumber = " + licence;
                 break;
             case 5:
                 System.out.println("Please type the customer id you wish to change to");
                 int newId = ScannerReader.scannerInt();
-                //return "UPDATE  KeaProject.DriverInfo SET customer_id = '" + newId + "' WHERE DriverLicenceNumber = " + licence;
                 query = "UPDATE  KeaProject.DriverInfo SET customer_id = '" + newId + "' WHERE DriverLicenceNumber = " + licence;
-                DBInteraction.updateDatabase(query);
                 break;
             default: //break;
 
                 return;
 
         }
-        //call DBInteraction.updateDatabase(query)
+        DBInteraction.updateDatabase(query);
 
     }
 
         // collecting the information from the user and return a query for the DB.
         public static void createQueryForAddingDriver () { //changed to void
 
-            //System.out.println("To add a driver, please input the corresponding customer_id");
-            //int customer_id = ScannerReader.scannerInt(11);
-            //needs to search from existing customer number -- ask Thomas
+            System.out.println("To add a driver, please input the corresponding customer_id");
+            int customer_id = ScannerReader.scannerInt();
+            //needs to verify that the user inputs a value from existing customer numbers-- ask Thomas
             System.out.println("Please type driver's licence number");
-            String driverLicenceNumber = ScannerReader.scannerWords(); // referring to Itai's Scanner Reader class. Makes sure that the user is input the correct values.
+            int driverLicenceNumber = ScannerReader.scannerInt();
             System.out.println("please type first name");
-            String driverFirstName = ScannerReader.scannerWords(); //
+            String driverFirstName = ScannerReader.scannerWords();
             System.out.println("Please type last name");
             String driverLastName = ScannerReader.scannerWords();
-            System.out.println("Please type driver since date");
-            int driverSinceDate = ScannerReader.scannerInt();
+            System.out.println("Please type driver since date. Please type date in YYYY-MM-DD format");
+            String driverSinceDate = ScannerReader.scannerAll();
 
-            String query = " VALUES ('" + driverLicenceNumber + "', '" + driverFirstName + "', '" + driverLastName + "', '" + driverSinceDate + "')"; //make sure to add customer id later
-            String completeQuery = "INSERT INTO KeaProject.DriverInfo (driverLicenceNumber, driverFirstName, driverLastName, customer_id, driverSinceDate)" + query;
+            String query = " VALUES (" + driverLicenceNumber + ", '" + driverFirstName + "', '" + driverLastName + "', '" + driverSinceDate + "', " + customer_id + ")";
+            String completeQuery = "INSERT INTO KeaProject.DriverInfo (driverLicenceNumber, driverFirstName, driverLastName, driverSinceDate, customer_id)" + query;
             DBInteraction.updateDatabase(completeQuery);
         }
 
@@ -199,12 +189,12 @@ public class DriverInfo {
         public static void seeDrivers()
         {
             String query = "SELECT * FROM KeaProject.DriverInfo"; //create a query to the DB
-            //DBInteraction.getData(query);
+            //DBInteraction.getData(query); not necessary because the DBInteraction in called in the below method
             showResultSetOfaDriver(query);
 
         }
 
-        public static String searchSpecificDriver () {
+        public static String searchSpecificDriver () { //DBInteraction is present in the createSearchQuery
             String field = searchField(); //asks user what column they want to search within
             String query = createSearchQuery(field); //provides WHERE value
             return query;
@@ -221,22 +211,19 @@ public class DriverInfo {
         //returns a table with all the information about one driver from the driver table
         public static void showResultSetOfaDriver (String query)
         {
+
             ResultSet rs = DBInteraction.getData(query);
-            //ResultSet rs = getQueryResultSet(query); //getting ResultSet from the DB
-            System.out.printf("%-25s%-20s%-20s%-20s%-20s\n", "driverLicenceNumber", "driverFirstName", "driverLastName", "DriverSinceDate", "customer_id");
-            System.out.println("________________________________________________________________________________________");
-            //int i = 0;
+
+            System.out.printf("%-20s%-20s%-20s%-20s%-20s\n", "driverLicenceNumber", "driverFirstName", "driverLastName", "DriverSinceDate", "customer_id");
+            System.out.println("________________________________________________________________________________________________________________");
             try {
-                while (rs.next()) { //iterating throw the resultSet and print it out
-                    System.out.printf("%-25s%-20s%-20s%-20s%-20s\n", (rs.getString("driverLicenceNumber")),
-                            (rs.getString("driverFirstName") + " " +
-                                    rs.getString("driverLastName")), rs.getString("DriverSinceDate"), rs.getString("customer_id")); //make sure to use Thomas's class
+                while (rs.next()) {
+                    System.out.printf("%-20s%-20s%-20s%-20s%-20s\n", rs.getInt("driverLicenceNumber"), rs.getString("driverFirstName"),
+                                    rs.getString("driverLastName"), rs.getString("driverSinceDate"), rs.getString("customer_id")); //make sure to use Thomas's class
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-
-
         }
 
     //method to find which search field the user would like to search in the Driver table
@@ -273,10 +260,10 @@ public class DriverInfo {
         {
            // USE KeaProject.driverInfo SELECT * FROM KeaProject.DriverInfo;
             //double-check statement
-            String selectQuery = "SELECT driversLicenceNumber, driverFirstName, driverLastName, driverSinceDate, customer_id FROM KeaProject.DriverInfo";
+            String selectQuery = "SELECT driverLicenceNumber, driverFirstName, driverLastName, driverSinceDate, customer_id FROM KeaProject.DriverInfo";
             System.out.println("Search: ");
             String userInput = ScannerReader.scannerAll();
-            String whereQuery = " WHERE " + searchField + " = '" + userInput + "'";
+            String whereQuery = " WHERE " + searchField + "= '" + userInput + "'";
             String query = selectQuery + whereQuery;
             showResultSetOfaDriver(query);
             DBInteraction.getData(query); //double-check that this is needed here
