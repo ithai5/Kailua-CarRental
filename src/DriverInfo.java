@@ -1,6 +1,7 @@
 //Driver info class from Nesrin
 package com.jetbrains;
 
+import java.util.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -162,22 +163,41 @@ public class DriverInfo {
         // collecting the information from the user and return a query for the DB.
         public static void createQueryForAddingDriver () { //changed to void
 
-            System.out.println("To add a driver, please input the corresponding customer_id");
-            int customer_id = ScannerReader.scannerInt();
-            //needs to verify that the user inputs a value from existing customer numbers-- ask Thomas
-            System.out.println("Please type driver's licence number");
-            int driverLicenceNumber = ScannerReader.scannerInt();
-            System.out.println("please type first name");
-            String driverFirstName = ScannerReader.scannerWords();
-            System.out.println("Please type last name");
-            String driverLastName = ScannerReader.scannerWords();
-            System.out.println("Please type driver since date. Please type date in YYYY-MM-DD format");
-            String driverSinceDate = ScannerReader.scannerAll();
 
-            String query = " VALUES (" + driverLicenceNumber + ", '" + driverFirstName + "', '" + driverLastName + "', '" + driverSinceDate + "', " + customer_id + ")";
-            String completeQuery = "INSERT INTO KeaProject.DriverInfo (driverLicenceNumber, driverFirstName, driverLastName, driverSinceDate, customer_id)" + query;
-            DBInteraction.updateDatabase(completeQuery);
-        }
+            System.out.println("To add a driver, please input the corresponding customer_id");
+            //below code verifies that the user inputs a value from existing customers
+
+            try {
+                String selectQuery = "SELECT customer_id FROM KeaProject.Customer";
+                String customer_id = ScannerReader.scannerAll();
+
+                String whereQuery = " WHERE customer_id = " + customer_id;
+                String q1 = selectQuery + whereQuery;
+                ResultSet result = DBInteraction.getData(q1);
+
+                if (result.next()){
+                    System.out.println("Customer_id found");
+
+                System.out.println("Please type driver's licence number");
+                int driverLicenceNumber = ScannerReader.scannerInt();
+                System.out.println("please type first name");
+                String driverFirstName = ScannerReader.scannerWords();
+                System.out.println("Please type last name");
+                String driverLastName = ScannerReader.scannerWords();
+                System.out.println("Please type driver since date. Please type date in YYYY-MM-DD format");
+                String driverSinceDate = ScannerReader.scannerAll();
+
+                String query = " VALUES (" + driverLicenceNumber + ", '" + driverFirstName + "', '" + driverLastName + "', '" + driverSinceDate + "', " + customer_id + ")";
+                String completeQuery = "INSERT INTO KeaProject.DriverInfo (driverLicenceNumber, driverFirstName, driverLastName, driverSinceDate, customer_id)" + query;
+                DBInteraction.updateDatabase(completeQuery);
+
+                }else{
+                    System.out.println("Customer_id not found. Please make a customer first before you add drivers onto the ID");
+                }
+            }catch (Exception e) {
+                System.out.println("error" + e.getMessage());
+            }
+         }
 
 
     //---------------------------------------------------------------
@@ -269,6 +289,10 @@ public class DriverInfo {
             DBInteraction.getData(query); //double-check that this is needed here
             return query;
         }
+
+
+
+
 
 
 
