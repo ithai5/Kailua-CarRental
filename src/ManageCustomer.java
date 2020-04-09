@@ -2,8 +2,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class ManageCustomer {
-    public ManageCustomer() {
-    }
 
     public static String quoteForString(String value, boolean withComma) {
         if (withComma) {
@@ -52,10 +50,10 @@ public class ManageCustomer {
         ResultSet listToPrint = getCustomerList();
         int i = 0;
         while(listToPrint.next()) {
-            String cusId = "[" + ++i + "].";
+            String listNum = "[" + ++i + "].";
             String fName = listToPrint.getString(2);
             String lName = listToPrint.getString(3);
-            System.out.printf("%-5s%-10s%-10s", cusId, fName, lName);
+            System.out.printf("%-7s%-10s%-10s", listNum, fName, lName);
             System.out.println();
         }
     }
@@ -108,6 +106,6 @@ public class ManageCustomer {
     }
 
     public static ResultSet getCustomerList() {
-        return DBInteraction.getData("SELECT Customer.customer_id, Customer.firstName, Customer.lastName FROM Customer");
+        return DBInteraction.getData("SELECT * FROM KeaProject.Customer;");
     }
 }
