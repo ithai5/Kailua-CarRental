@@ -179,7 +179,8 @@ public class DriverInfo {
                     System.out.println("Customer_id found");
 
                 System.out.println("Please type driver's licence number");
-                int driverLicenceNumber = ScannerReader.scannerInt();
+               // int driverLicenceNumber = ScannerReader.scannerInt();
+                long driverLicenceNumber = scannerLong();
                 System.out.println("please type first name");
                 String driverFirstName = ScannerReader.scannerWords();
                 System.out.println("Please type last name");
@@ -189,7 +190,9 @@ public class DriverInfo {
 
                 String query = " VALUES (" + driverLicenceNumber + ", '" + driverFirstName + "', '" + driverLastName + "', '" + driverSinceDate + "', " + customer_id + ")";
                 String completeQuery = "INSERT INTO KeaProject.DriverInfo (driverLicenceNumber, driverFirstName, driverLastName, driverSinceDate, customer_id)" + query;
+                System.out.println("Driver is now created.");
                 DBInteraction.updateDatabase(completeQuery);
+
 
                 }else{
                     System.out.println("Customer_id not found. Please make a customer first before you add drivers onto the ID");
@@ -238,7 +241,7 @@ public class DriverInfo {
             System.out.println("________________________________________________________________________________________________________________");
             try {
                 while (rs.next()) {
-                    System.out.printf("%-20s%-20s%-20s%-20s%-20s\n", rs.getInt("driverLicenceNumber"), rs.getString("driverFirstName"),
+                    System.out.printf("%-20s%-20s%-20s%-20s%-20s\n", rs.getLong("driverLicenceNumber"), rs.getString("driverFirstName"),
                                     rs.getString("driverLastName"), rs.getString("driverSinceDate"), rs.getString("customer_id")); //make sure to use Thomas's class
                 }
             } catch (SQLException e) {
@@ -290,6 +293,26 @@ public class DriverInfo {
             return query;
         }
 
+
+    public static long scannerLong ()
+    { //Used when needing int input
+        Scanner console = new Scanner(System.in);
+        long num = 0;
+        boolean valid = true;
+
+        do {
+            try {
+                num = console.nextLong();
+                valid = false;
+            } catch (Exception e) {
+                console.next();
+                console.nextLine();
+                System.out.println("You did not enter a number");
+            }
+        } while (valid);
+
+        return num;
+    }
 
 
 
