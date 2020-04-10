@@ -1,61 +1,55 @@
-/*
-    this class should handle interaction with MySQL Database.this class has been created by Itai Gramse, as a part of project at kea university. this c
- */
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
-class DBInteraction{
+public class DBInteraction {
     private static String user;
     private static String password;
     private static String address;
 
-    public DBInteraction (String user, String password,String address)
-    {
-        this.user = user;
-        this.password = password;
-        this.address = "jdbc:mysql://" + address + "/KeaProject";
+    public DBInteraction(String user, String password, String address) {
+        DBInteraction.user = user;
+        DBInteraction.password = password;
+        DBInteraction.address = "jdbc:mysql://" + address + "/KeaProject";
     }
 
-    public static ResultSet getData(String query)
-    {
+    public static ResultSet getData(String query) {
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            Connection connection = DriverManager.getConnection(address,user,password );
+            Connection connection = DriverManager.getConnection(address, user, password);
             Statement statement = connection.createStatement();
             ResultSet rs = statement.executeQuery(query);
             return rs;
-        } catch (ClassNotFoundException | SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException | ClassNotFoundException var4) {
+            var4.printStackTrace();
+            return null;
         }
-        return null;
     }
 
-    public static int updateDatabase(String query)
-    {
+    public static int updateDatabase(String query) {
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            Connection connection = DriverManager.getConnection(address,user,password);
+            Connection connection = DriverManager.getConnection(address, user, password);
             Statement statement = connection.createStatement();
-            int  result = statement.executeUpdate(query);
+            int result = statement.executeUpdate(query);
             return result;
-        } catch (ClassNotFoundException | SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException | ClassNotFoundException var4) {
+            var4.printStackTrace();
+            return 0;
         }
-        return 0;
     }
 
-    public void setUser (String user)
-    {
-        this.user = user;
+    public void setUser(String user) {
+        DBInteraction.user = user;
     }
 
-    public void setPassword (String password)
-    {
-        this.password = password;
+    public void setPassword(String password) {
+        DBInteraction.password = password;
     }
 
-    public void setAddress (String address)
-    {
-        this.address = address;
+    public void setAddress(String address) {
+        DBInteraction.address = address;
     }
-
 }
