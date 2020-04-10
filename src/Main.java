@@ -13,10 +13,14 @@ public class Main {
         switch(choice) {
             case 1:
                 DBInteraction.updateDatabase(ManageCustomer.newCustomerQuery());
+                int newCustomerId = QueryUtility.chooseRowFromList(QueryUtility.getList("Customer"),
+                        QueryUtility.tableSize("Customer", ""));
+                DBInteraction.updateDatabase(ManagePhone.newPhoneQuery(newCustomerId));
                 System.out.println("New customer has been created!");
                 break;
             case 2:
                 ManageCustomer.printCustomerList();
+                ManagePhone.printPhoneList("");
                 break;
             case 3:
                 DBInteraction.updateDatabase(ManageCustomer.updateCustomerQuery());
