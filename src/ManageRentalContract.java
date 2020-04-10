@@ -49,6 +49,7 @@ public class ManageRentalContract {
         ResultSet rs = DBInteraction.getData("SELECT Customer.firstName, Customer.lastName, RentalContract.startDate, RentalContract.endDate, CarInfo.licencePlate, Specs.brand, Specs.model,ClassType.className, RentalContract.rentalContract_id " + "" + "FROM KeaProject.RentalContract " + "INNER JOIN KeaProject.Customer ON Customer.customer_id = RentalContract.customer_id " + "INNER JOIN KeaProject.CarInfo ON  RentalContract.licencePlate = CarInfo.licencePlate " + "INNER JOIN KeaProject.Specs ON Specs.specs_id = CarInfo.specs_id " + "INNER JOIN KeaProject.ClassType ON Specs.className_id = ClassType.className_id " + whereQuery);
         System.out.printf("%-5s%-20s%-25s%-25s%-15s%-15s%-10s%-10s\n", "Num", "Name", "Start Rental", "End Rental", "Licence Num", "Brand", "Model", "Class");
         System.out.println("___________________________________________________________________________________________________________");
+
         try {
             int i = 0;
             while (rs.next()) {
@@ -155,14 +156,14 @@ public class ManageRentalContract {
                         int customer_id;
                         System.out.println("are you a customer?" + "\n[1] Yes" + "\n[2] No");
                         if (ScannerReader.scannerBoolean(3)) {
-                            // call thomas method to search
-                            System.out.println("please Type your eMail address");
-                            String email = ScannerReader.scannerEMail();
-                            customer_id = ManageCustomer.findCustomerId(3, email);
+                            customer_id = ManageCustomer.findCustomerId();
                         }
+                        //Creates new Customer + Phone + Driver
                         else {
-                            DBInteraction.updateDatabase(ManageCustomer.newCustomerQuery());
-                            customer_id = ManageCustomer.getCustomerById(ManageCustomer.tableSize("Customer"));
+                            Menu.createFullCustomer();
+                            customer_id = QueryUtility.chooseRowFromList(
+                                    QueryUtility.getList("Customer", ""),
+                                    QueryUtility.tableSize("Customer", ""));
                         }
                         query = "UPDATE KeaProject.RentalContract " +
                                 "customer_id = " + customer_id + " " +
@@ -229,8 +230,7 @@ public class ManageRentalContract {
     }
 
     //this class will be called from the menu class for handle car rent
-    public static void rentCarMenu ()
-    {
+    public static void rentCarMenu () throws SQLException {
         String carClass = chooseCarType();
         String startRent = collectDateInfo("start");
         String endRent = collectDateInfo("end");
@@ -265,19 +265,19 @@ public class ManageRentalContract {
             System.out.println("are you a customer?");
             if (ScannerReader.scannerBoolean(3)) {
                 // call thomas method to search
-                System.out.println("please Type your eMail address");
-                String email = ScannerReader.scannerEMail();
                 try {
-                    customer_id = ManageCustomer.findCustomerId(3, email);
+                    customer_id = ManageCustomer.findCustomerId();
                 }
                 catch (SQLException e) {
                     e.printStackTrace();
                 }
             }
             else {
-                DBInteraction.updateDatabase(ManageCustomer.newCustomerQuery());
+                Menu.createFullCustomer();
                 try {
-                    customer_id = ManageCustomer.getCustomerById(ManageCustomer.tableSize("Customer"));
+                    customer_id = QueryUtility.chooseRowFromList(
+                            QueryUtility.getList("Customer", ""),
+                            QueryUtility.tableSize("Customer", ""));
                 }
                 catch (SQLException e) {
                     e.printStackTrace();
@@ -334,35 +334,5 @@ public class ManageRentalContract {
         return year + "-" + month + "-" + day;
 
     }
-    public static void contractMenu (){
-        System.out.println("[1]. Create new contract\n" +
-                "[2]. Delete contract\n" +
-                "[3]. Update contract\n" +
-                "[4]. View contract\n" +
-                "[5]. Search contract\n" +
-                "[0]. Return to main-menu");
-        int userInput = ScannerReader.scannerInt(0,5);
-        switch (userInput) {
-            case 0:
-                return;
-            case 1:
-                rentCarMenu();
-                return;
-            case 2:
-                deleteRentalContract();
-                return;
-            case 3:
-                updateContract();
-                return;
-            case 4:
-                viewRentalContract("");
-                return;
-            case 5:
-                viewRentalContract(searchInTable());
-                return;
-        }
-
-    }
-
 
 }

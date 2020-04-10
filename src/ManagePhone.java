@@ -3,34 +3,20 @@ import java.sql.SQLException;
 
 public class ManagePhone {
 
-    //Pass whatever goes past the WHERE part of your query into 'filter', if any.
-    //If you have no filters, pass in ""
-    //Please note, there's automatically a space between WHERE and the filter, and
-    //a ";" after the filter
-    public static ResultSet getPhoneList(String filter) {
-        String selectQuery = "SELECT * FROM KeaProject.Phone";
-        if (!filter.isEmpty()) {
-            selectQuery += "\nWHERE " + filter;
-        }
-
-        selectQuery += ";";
-        return DBInteraction.getData(selectQuery);
-    }
-
     public static String newPhoneQuery(int cusId) {
 
         String newPhone = "INSERT INTO KeaProject.Phone (phoneNumber, phoneType, customer_id)\nVALUES (";
         System.out.print("Please enter the customer's telephone number: ");
-        String phoneNum = ManageCustomer.quoteForString(ScannerReader.scannerIntAsString(8), true);
+        String phoneNum = QueryUtility.formatValue(ScannerReader.scannerIntAsString(8), true);
         newPhone += phoneNum;
         System.out.println();
 
         System.out.println("Is this number a personal phone?");
         String phoneType = "";
         if (ScannerReader.scannerBoolean(3)) {
-            phoneType = ManageCustomer.quoteForString("MobilePhone", true);
+            phoneType = QueryUtility.formatValue("MobilePhone", true);
         } else {
-            phoneType = ManageCustomer.quoteForString("HomePhone", true);
+            phoneType = QueryUtility.formatValue("HomePhone", true);
         }
         newPhone += phoneType;
 
@@ -39,29 +25,23 @@ public class ManagePhone {
         return newPhone;
     }
 
-    public static String updatePhoneQuery(int cusId) throws SQLException {
-        String filter = "Phone.customer_id = " + cusId;
-        int numberOfPhoneNums = tableSize("Phone", filter);
+    public static String updatePhoneQuery() throws SQLException {
+        System.out.println("Who owns the phone?");
+        String filter = "Phone.customer_id = " + ManageCustomer.findCustomerId();
 
-        int phoneId;
-        if (numberOfPhoneNums > 1) {
-            System.out.println("Please choose which number's details you would like to edit:");
-            printPhoneList(filter);
-            int choice = ScannerReader.scannerInt(1, numberOfPhoneNums);
-            phoneId = getPhoneById(choice);
-        } else {
-            phoneId = getPhoneById(1);
-        }
+        int numberOfPhoneNums = QueryUtility.tableSize("Phone", filter);
+        int phoneId = getPhoneFromList(numberOfPhoneNums, filter);
 
         System.out.println("What information would you like to update?\n[1]. Phone Number\n[2]. Phone Type");
         int choice = ScannerReader.scannerInt(1, 2);
         String field = getField(choice);
+
         System.out.print("Please input the updated information: ");
         String changedInfo = "";
         if (choice == 1) {
-            changedInfo = ManageCustomer.quoteForString(ScannerReader.scannerIntAsString(), false);
+            changedInfo = QueryUtility.formatValue(ScannerReader.scannerIntAsString(), false);
         } else {
-            changedInfo = ManageCustomer.quoteForString(ScannerReader.scannerWords(), false);
+            changedInfo = QueryUtility.formatValue(ScannerReader.scannerWords(), false);
         }
         System.out.println();
 
@@ -69,28 +49,21 @@ public class ManagePhone {
     }
 
     //Leave no Orphans!!
-    public static String deletePhoneQuery(int cusId) throws SQLException {
-        String filter = "Phone.customer_id = " + cusId;
+    public static String deletePhoneQuery() throws SQLException {
+        System.out.println("Who owns the phone?");
+        String filter = "Phone.customer_id = " + ManageCustomer.findCustomerId();
         printPhoneList(filter);
-        int numberOfPhoneNums = tableSize("Phone", filter);
-        int phoneId;
-        if (numberOfPhoneNums > 1) {
-            System.out.println("Please choose which number you would like to delete:");
-            printPhoneList(filter);
-            int choice = ScannerReader.scannerInt(1, numberOfPhoneNums);
-            phoneId = getPhoneById(choice);
-        } else {
-            phoneId = getPhoneById(1);
-        }
 
-        String deleteQuery = "DELETE FROM Phone WHERE " + filter;
+        int numberOfPhoneNums = QueryUtility.tableSize("Phone", filter);
+        int phoneId = getPhoneFromList(numberOfPhoneNums, filter);
+
+        String deleteQuery = "DELETE FROM Phone WHERE Phone.phone_id = " + phoneId + ";";
         return deleteQuery;
     }
 
-
     //0 = phone_id, 1 = phoneNumber, 2 = phoneType and 3 = customer_id
     public static String getField(int fieldName) {
-        switch(fieldName) {
+        switch (fieldName) {
             case 0:
                 return "Phone.phone_id";
             case 1:
@@ -105,9 +78,9 @@ public class ManagePhone {
     }
 
     public static void printPhoneList(String filter) throws SQLException {
-        ResultSet listToPrint = getPhoneList(filter);
+        ResultSet listToPrint = QueryUtility.getList("Phone", filter);
         int i = 0;
-        while(listToPrint.next()) {
+        while (listToPrint.next()) {
             String listNum = "[" + ++i + "].";
             String phoneNumber = listToPrint.getString(2);
             String phoneType = listToPrint.getString(3);
@@ -116,36 +89,26 @@ public class ManagePhone {
             System.out.println();
         }
     }
+    
+    public static int findPhoneId() throws SQLException {
+        System.out.println("What information would you like to search by?\n[1]. Phone Number\n[2]. Phone Type");
+        String phoneField = ManagePhone.getField(ScannerReader.scannerInt(1,2));
+        System.out.print("Search: ");
+        String phoneParam = ScannerReader.scannerWords();
 
-    public static int getPhoneById(int listNum) throws SQLException {
-        ResultSet phoneList = getPhoneList("");
-        phoneList.absolute(listNum);
-
-        return phoneList.getInt(1);
+        return QueryUtility.extractIntFromString(QueryUtility.findPrimaryKey("Phone", phoneField, phoneParam));
     }
 
-    public static int findPhoneId(int fieldName, String searchParam) throws SQLException {
-        String field = getField(fieldName);
-        String queryId = "SELECT Phone.phone_id\nFROM Phone\nWHERE " + field + " = \"" + searchParam + "\";";
-        ResultSet rs = DBInteraction.getData(queryId);
+    public static int getPhoneFromList(int totalPhones, String filter) throws SQLException {
+        int phoneInList;
 
-        rs.next();
-        return rs.getInt(1);
-    }
-
-    //Pass whatever goes past the WHERE part of your query into 'filter', if any.
-    //If you have no filters, pass in ""
-    //Please note, there's automatically a space between WHERE and the filter, and
-    //a ";" after the filter
-    public static int tableSize(String table, String filter) throws SQLException {
-        String countQuery = "SELECT COUNT(*)\nFROM " + table;
-        if (!filter.isEmpty()) {
-            countQuery += "\nWHERE " + filter;
+        if (totalPhones > 1) {
+            System.out.println("Please choose which number:");
+            printPhoneList(filter);
+            phoneInList = ScannerReader.scannerInt(1, totalPhones);
+        } else {
+            phoneInList = 1;
         }
-
-        countQuery += ";";
-        ResultSet size = DBInteraction.getData(countQuery);
-        size.next();
-        return size.getInt(1);
+        return QueryUtility.chooseRowFromList(QueryUtility.getList("Phone", filter), phoneInList);
     }
 }

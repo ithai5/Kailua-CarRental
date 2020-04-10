@@ -1,5 +1,6 @@
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Scanner;
 
 public class QueryUtility {
     //Consider merging this with DBInteraction
@@ -48,7 +49,25 @@ public class QueryUtility {
     }
 
 
-    public static ResultSet getList(String table) {
-        return DBInteraction.getData("SELECT * FROM " + table + ";");
+    public static int extractIntFromString(String token) {
+        Scanner extract = new Scanner(token);
+
+        return extract.nextInt();
+    }
+
+    //Pass whatever goes past the WHERE part of your query into 'filter', if any.
+    //If you have no filters, pass in ""
+    //Please note, there's automatically a space between WHERE and the filter, and
+    //a ";" after the filter
+    public static ResultSet getList(String table, String filter) {
+        String selectQuery = "SELECT * FROM " + table;
+
+        if (!filter.isEmpty()) {
+            selectQuery += "\nWHERE " + filter;
+        } else {
+            selectQuery += ";";
+        }
+
+        return DBInteraction.getData(selectQuery);
     }
 }

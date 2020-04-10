@@ -3,42 +3,43 @@ import java.sql.SQLException;
 
 public class ManageCustomer {
 
-    public static String quoteForString(String value, boolean withComma) {
-        if (withComma) {
-            return "\"" + value + "\", ";
-        } else {
-            return "\"" + value + "\"";
-        }
-    }
-
     public static String newCustomerQuery() {
+        String newCustomer = "INSERT INTO KeaProject.Customer (firstName, lastName, email)\nVALUES (";
+
         System.out.print("Please enter the customer's first name: ");
         String firstName = ScannerReader.scannerWords();
         System.out.println();
+        newCustomer += QueryUtility.formatValue(firstName, true);
+
         System.out.print("Please enter the customer's last name: ");
         String lastName = ScannerReader.scannerWords();
         System.out.println();
+        newCustomer += QueryUtility.formatValue(lastName, true);
+
         System.out.print("Which e-mail would the customer like to be contacted on?: ");
         String email = ScannerReader.scannerEMail();
         System.out.println();
-        String newCustomer = "INSERT INTO KeaProject.Customer (firstName, lastName, email)\nVALUES (" +
-                quoteForString(firstName, true) + quoteForString(lastName, true) + quoteForString(email, false) + ");";
+        newCustomer += QueryUtility.formatValue(email, false) + ");";
+
         return newCustomer;
     }
 
     public static String updateCustomerQuery() throws SQLException {
         System.out.println("Which customer's details would you like to change?");
-        printCustomerList();
-        int customerId = getCustomerById(ScannerReader.scannerInt(1, tableSize("Customer")));
+        printCustomerList("");
+        int cusNum = ScannerReader.scannerInt(1, QueryUtility.tableSize("Customer", ""));
+        int customerId = QueryUtility.chooseRowFromList(QueryUtility.getList("Customer", ""), cusNum);
+
         System.out.println("What information would you like to update?\n[1]. First name\n[2]. Last name\n[3]. E-mail address");
         int choice = ScannerReader.scannerInt(1, 3);
         String field = getField(choice);
+
         System.out.print("Please input the updated information: ");
         String changedInfo = "";
         if (choice == 3) {
-            changedInfo = quoteForString(ScannerReader.scannerEMail(), false);
+            changedInfo = QueryUtility.formatValue(ScannerReader.scannerEMail(), false);
         } else {
-            changedInfo = quoteForString(ScannerReader.scannerWords(), false);
+            changedInfo = QueryUtility.formatValue(ScannerReader.scannerWords(), false);
         }
         System.out.println();
 
@@ -46,42 +47,35 @@ public class ManageCustomer {
         return updateQuery;
     }
 
-    public static void printCustomerList() throws SQLException {
-        ResultSet listToPrint = getCustomerList();
+    public static void printCustomerList(String filter) throws SQLException {
+        ResultSet listToPrint = QueryUtility.getList("Customer", filter);
         int i = 0;
         while(listToPrint.next()) {
             String listNum = "[" + ++i + "].";
             String fName = listToPrint.getString(2);
             String lName = listToPrint.getString(3);
-            System.out.printf("%-7s%-10s%-10s", listNum, fName, lName);
+            String email = listToPrint.getString(4);
+            System.out.printf("%-7s%-10s%-10s%-10s", listNum, fName, lName, email);
             System.out.println();
         }
     }
 
     public static String deleteCustomerQuery() throws SQLException {
         System.out.println("Which customer would you like to remove from the database?");
-        printCustomerList();
-        int customerId = getCustomerById(ScannerReader.scannerInt(1, tableSize("Customer")));
+        printCustomerList("");
+        int cusNum = ScannerReader.scannerInt(1, QueryUtility.tableSize("Customer", ""));
+        int customerId = QueryUtility.chooseRowFromList(QueryUtility.getList("Customer", ""), cusNum);
 
         String deleteQuery = "DELETE FROM Customer WHERE Customer.customer_id = " + customerId;
         return deleteQuery;
     }
 
-    public static int findCustomerId(int fieldName, String searchParam) throws SQLException {
-        String field = getField(fieldName);
-        String queryId = "SELECT Customer.customer_id\nFROM Customer\nWHERE " + field + " = \"" + searchParam + "\";";
-        ResultSet rs = DBInteraction.getData(queryId);
-
-        rs.next();
-        return rs.getInt(1);
-    }
-
-
-    public static int getCustomerById(int cusNumber) throws SQLException {
-        ResultSet cusList = getCustomerList();
-        cusList.absolute(cusNumber);
-
-        return cusList.getInt(1);
+    public static int findCustomerId() throws SQLException {
+        System.out.println("What information would you like to search by?\n[1]. First name\n[2]. Last name\n[3]. E-mail address");
+        String cusField = ManageCustomer.getField(ScannerReader.scannerInt(1, 3));
+        System.out.print("Search: ");
+        String cusParam = ScannerReader.scannerWords();
+        return QueryUtility.extractIntFromString(QueryUtility.findPrimaryKey("Customer", cusField, cusParam));
     }
 
     public static String getField(int fieldName) {
@@ -99,13 +93,4 @@ public class ManageCustomer {
         }
     }
 
-    public static int tableSize(String table) throws SQLException {
-        ResultSet size = DBInteraction.getData("SELECT COUNT(*)\nFROM " + table);
-        size.next();
-        return size.getInt(1);
-    }
-
-    public static ResultSet getCustomerList() {
-        return DBInteraction.getData("SELECT * FROM KeaProject.Customer;");
-    }
 }
