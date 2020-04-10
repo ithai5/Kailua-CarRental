@@ -6,20 +6,17 @@ class Calendar {
    public static String convertDate(String date){
       String converted = "";
       for (int i = 0; i<date.length();i++){
-         System.out.println(i +".");
          if (date.charAt(i) == '-'){
             converted += ' ';
          }
          else{
             converted += date.charAt(i);
          }
-         System.out.println(date.charAt(i));
       }
-
       Scanner scanner = new Scanner(converted);
-      String year = scanner.next();
-      String month = scanner.next();
-      String day = scanner.next();
+      int year = scanner.nextInt();
+      int month = scanner.nextInt();
+      int day = scanner.nextInt();
       System.out.println(day + " " + month + " " + year);
       return day + " " + month + " " + year;
    }
@@ -64,7 +61,7 @@ class Calendar {
    
    public static int daysInBetween(String startDate, String endDate){ //day counter to know how many days we have booked to.
       int count=1;
-      while (!startDate.equals(endDate)){
+      while (!startDate.equalsIgnoreCase(endDate)){
          count++;
          startDate=nextDay(startDate);
       }
