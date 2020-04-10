@@ -125,8 +125,8 @@ public class ScannerReader {
     {
         while (number > 2 || number < 1) {
             System.out.println("Please type " +
-                    "\n[1] for YES " +
-                    "\n[2] for NO ");
+                    "\n[1]. for YES " +
+                    "\n[2]. for NO ");
             number = scannerInt();
         }
         if (number == 1) {

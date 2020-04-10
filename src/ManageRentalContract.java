@@ -11,7 +11,7 @@ public class ManageRentalContract {
     //for minimize the option, can be added where to the query
     public static String searchInTable ()
     {
-        System.out.println("what would you like to search by?" + "\n[1] First Name" + "\n[2] Last Name" + "\n[3] Start Date" + "\n[4] End Date" + "\n[5] Car Licence Plate" + "\n[0] return to the menu");
+        System.out.println("what would you like to search by?" + "\n[1]. First Name" + "\n[2]. Last Name" + "\n[3]. Start Date" + "\n[4]. End Date" + "\n[5]. Car Licence Plate" + "\n[0]. return to the menu");
         String searchTerm = "";
         int userType = ScannerReader.scannerInt(0, 5);
         switch (userType) {
@@ -53,7 +53,7 @@ public class ManageRentalContract {
             int i = 0;
             while (rs.next()) {
                 i++;
-                System.out.printf("%-5s%-20s%-25s%-25s%-15s%-15s%-10s%-10s\n", "[" + i + "]", rs.getString("firstName") + " " + rs.getString("lastName"), rs.getString("startDate"), rs.getString("endDate"), rs.getString("licencePlate"), rs.getString("brand"), rs.getString("model"), rs.getString("className"));
+                System.out.printf("%-5s%-20s%-25s%-25s%-15s%-15s%-10s%-10s\n", "[" + i + "].", rs.getString("firstName") + " " + rs.getString("lastName"), rs.getString("startDate"), rs.getString("endDate"), rs.getString("licencePlate"), rs.getString("brand"), rs.getString("model"), rs.getString("className"));
             }
         }
         catch (SQLException e) {
@@ -65,7 +65,16 @@ public class ManageRentalContract {
     //return result set of available cars between two dates
     public static ResultSet availableCars (String startDate, String endDate, String className)
     {
-        String query = "SELECT licencePlate, brand, model, className " + "FROM Specs AS b " + "JOIN " + "(SELECT CarInfo.licencePlate, startDate, endDate, rentalContract_id, CarInfo.specs_id " + "FROM KeaProject.CarInfo AS a " + "JOIN KeaProject.RentalContract ON a.licencePlate= RentalContract.licencePlate " + "AND ((startDate >= '" + startDate + "' AND startDate <= '" + endDate + "') " + "OR(endDate >= '" + startDate + "' AND endDate <= '" + endDate + "') " + "OR (startDate >= '" + startDate + "' AND endDate <= '" + endDate + "')) " + "RIGHT JOIN CarInfo ON a.licencePlate = CarInfo.licencePlate " + "WHERE rentalContract_id IS NULL) AS c " + "ON b.specs_id = c.specs_id  " + "JOIN KeaProject.ClassType AS d " + "ON b.className_id = d.className_id AND className LIKE '%" + className + "'";
+        String query = "SELECT licencePlate, brand, model, className " +
+                "FROM Specs AS b " +
+                "JOIN " +
+                "(SELECT CarInfo.licencePlate, startDate, endDate, rentalContract_id, CarInfo.specs_id " +
+                "FROM KeaProject.CarInfo AS a " + "JOIN KeaProject.RentalContract ON a.licencePlate= RentalContract.licencePlate " +
+                "AND ((startDate >= '" + startDate + "' AND startDate <= '" + endDate + "') " + "OR(endDate >= '" + startDate + "' AND endDate <= '" + endDate + "') " +
+                "OR (startDate >= '" + startDate + "' AND endDate <= '" + endDate + "')) " +
+                "RIGHT JOIN CarInfo ON a.licencePlate = CarInfo.licencePlate " +
+                "WHERE rentalContract_id IS NULL) AS c " + "ON b.specs_id = c.specs_id  " +
+                "JOIN KeaProject.ClassType AS d " + "ON b.className_id = d.className_id AND className LIKE '%" + className + "'";
         ResultSet rs = DBInteraction.getData(query);
         System.out.printf("%-8s%-17s%-15s%-15s%-15s\n", "Num", "Licence", "Brand", "Model", "Class");
         System.out.println("____________________________________________________________________");
@@ -73,7 +82,7 @@ public class ManageRentalContract {
         try {
             while (rs.next()) {
                 i++;
-                System.out.printf("%-8s%-17s%-15s%-15s%-15s\n", "[" + i + "]", rs.getString("licencePlate"), rs.getString("brand"), rs.getString("Model"), rs.getString("className"));
+                System.out.printf("%-8s%-17s%-15s%-15s%-15s\n", "[" + i + "].", rs.getString("licencePlate"), rs.getString("brand"), rs.getString("Model"), rs.getString("className"));
 
             }
             rs.beforeFirst();
@@ -102,16 +111,74 @@ public class ManageRentalContract {
         return 0;
     }
 
-    //method for extending contract. not done yet
-    public static void extendRentalContract ()
+    //method for updating contract
+    public static void updateContract ()
     {
         ResultSet rs = viewRentalContract(searchInTable());
         System.out.println("Which rental contract would you like to update? ");
         try {
             if (rs.next() == true) {
                 int userInput = ScannerReader.scannerInt();
+                String query ="";
                 rs.absolute(userInput);
-
+                String rentalContractId = rs.getString("rentalContract_id");
+                System.out.println("What would you like to update ?" +
+                        "\n[1]. Change dates" +
+                        "\n[2]. Change customer" +
+                        "\n[3]. Change price" +
+                        "\n[0]. Return to the menu");
+                userInput = ScannerReader.scannerInt(0,3);
+                switch (userInput){
+                    case 0:
+                        return;
+                    case 1:
+                        String startDate = collectDateInfo("start");
+                        String endDate = collectDateInfo("end");
+                        rs = availableCars(startDate,endDate, chooseCarType());
+                        rs.beforeFirst();
+                        if(rs.next() == true){
+                            System.out.println("Please choose the car that you would like to rent");
+                            int userType = ScannerReader.scannerInt();
+                            rs.absolute(userType);
+                            String licenceNumber = rs.getString("licenceNumber");
+                            query = "UPDATE KeaProject.RentalContract " +
+                                    "SET licenceNumber = '" + licenceNumber + "' " +
+                                    "startDate = '" + startDate + "' " +
+                                    "endDate = '" + endDate + "' " +
+                                    "WHERE rentalContract_id = " + rentalContractId;
+                        }
+                        else{
+                            System.out.println("sorry but there is not available car on those days");
+                        }
+                        break;
+                    case 2:
+                        int customer_id;
+                        System.out.println("are you a customer?" + "\n[1] Yes" + "\n[2] No");
+                        if (ScannerReader.scannerBoolean(3)) {
+                            // call thomas method to search
+                            System.out.println("please Type your eMail address");
+                            String email = ScannerReader.scannerEMail();
+                            customer_id = ManageCustomer.findCustomerId(3, email);
+                        }
+                        else {
+                            DBInteraction.updateDatabase(ManageCustomer.newCustomerQuery());
+                            customer_id = ManageCustomer.getCustomerById(ManageCustomer.tableSize("Customer"));
+                        }
+                        query = "UPDATE KeaProject.RentalContract " +
+                                "customer_id = " + customer_id + " " +
+                                "WHERE rentalContract = " + rentalContractId;
+                        break;
+                    case 3:
+                        System.out.println("Please Type the new Price");
+                        int price = ScannerReader.scannerInt(1,999999999);
+                        query = "UPDATE KeaProject.RentalContract " +
+                                "price = " + price + " " +
+                                "WHERE rentalContract = " + rentalContractId;
+                        break;
+                }
+                if (query.length()>0) {
+                    DBInteraction.updateDatabase(query);
+                }
             }
             else {
                 System.out.println("no contract have been found");
@@ -142,7 +209,7 @@ public class ManageRentalContract {
     //allow the user to choose a car type
     public static String chooseCarType ()
     {
-        System.out.println("Which car type would you like to rent ?\n" + "[1] Family \n" + "[2] Sport \n" + "[3] Luxury \n" + "[4] Show all options\n" + "[0] cancel ");
+        System.out.println("Which car type would you like to rent ?\n" + "[1]. Family \n" + "[2]. Sport \n" + "[3]. Luxury \n" + "[4]. Show all options\n" + "[0]. cancel ");
         int userInput = ScannerReader.scannerInt(0, 4);
         switch (userInput) {
             case 0:
@@ -195,7 +262,7 @@ public class ManageRentalContract {
         }
         int customer_id = -1;
         while (customer_id < 0) {
-            System.out.println("are you a customer?" + "\n[1] Yes" + "\n[2] No");
+            System.out.println("are you a customer?");
             if (ScannerReader.scannerBoolean(3)) {
                 // call thomas method to search
                 System.out.println("please Type your eMail address");
@@ -248,7 +315,6 @@ public class ManageRentalContract {
         }
     }
 
-
     public static String collectDateInfo (String request)
     {
         System.out.println("Please state the " + request + " day of rental");
@@ -266,6 +332,35 @@ public class ManageRentalContract {
         System.out.println("Please state the " + request + " year of rental");
         int year = ScannerReader.scannerInt(1900, 9999);
         return year + "-" + month + "-" + day;
+
+    }
+    public static void contractMenu (){
+        System.out.println("[1]. Create new contract\n" +
+                "[2]. Delete contract\n" +
+                "[3]. Update contract\n" +
+                "[4]. View contract\n" +
+                "[5]. Search contract\n" +
+                "[0]. Return to main-menu");
+        int userInput = ScannerReader.scannerInt(0,5);
+        switch (userInput) {
+            case 0:
+                return;
+            case 1:
+                rentCarMenu();
+                return;
+            case 2:
+                deleteRentalContract();
+                return;
+            case 3:
+                updateContract();
+                return;
+            case 4:
+                viewRentalContract("");
+                return;
+            case 5:
+                viewRentalContract(searchInTable());
+                return;
+        }
 
     }
 
