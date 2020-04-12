@@ -38,6 +38,7 @@ public class Menu {
                 QueryUtility.tableSize("Customer", ""));
         DBInteraction.updateDatabase(ManagePhone.newPhoneQuery(newCustomerId));
         //Create new DriverInfo
+        System.out.println("ID for customer: " + newCustomerId);
         DriverInfo.createQueryForAddingDriver();
         System.out.println("New customer has been created!");
         System.out.println();
@@ -46,7 +47,7 @@ public class Menu {
     public static void customerMenu() throws SQLException {
         boolean keepLooping = true;
         while (keepLooping) {
-            System.out.println("Please choose an option\n[1]. Create new customer\n[2]. List details from all customers\n[3]. Search customer details\n[4]. Update customer info\n[5]. Delete customer\n[0]. Return to main menu\n");
+            System.out.println("Please choose an option\n[1]. Create new customer\n[2]. List details from all customers\n[3]. Search customer details\n[4]. Update customer info\n[5]. Delete customer info\n[0]. Return to main menu\n");
             System.out.print("Your input: ");
             int choice = ScannerReader.scannerInt(0, 5);
             System.out.println();
@@ -108,11 +109,11 @@ public class Menu {
 
         switch (choice) {
             case 1:
-                int customerId = ManageCustomer.findCustomerId();
+                int customerId = ManageCustomer.assignCusId();
                 ManageCustomer.printCustomerList("Customer.customer_id = " + customerId);
                 break;
             case 2:
-                int phoneId = ManagePhone.findPhoneId();
+                int phoneId = ManagePhone.assignPhoneId();
                 ManagePhone.printPhoneList("Phone.phone_id = " + phoneId);
                 break;
             case 3:
@@ -156,10 +157,10 @@ public class Menu {
 
         switch (choice) {
             case 1:
-                ManageCustomer.deleteCustomerQuery();
+                DBInteraction.updateDatabase(ManageCustomer.deleteCustomerQuery());
                 break;
             case 2:
-                ManagePhone.deletePhoneQuery();
+                DBInteraction.updateDatabase(ManagePhone.deletePhoneQuery());
                 break;
             case 3:
                 DriverInfo.deleteDriver();
@@ -171,7 +172,7 @@ public class Menu {
         System.out.println();
     }
 
-    public static void carMenu(){
+    public static void carMenu() throws SQLException {
         boolean keepLooping = true;
         while (keepLooping) {
             System.out.println("Please choose an option");

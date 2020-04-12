@@ -27,10 +27,12 @@ public class ManagePhone {
 
     public static String updatePhoneQuery() throws SQLException {
         System.out.println("Who owns the phone?");
-        String filter = "Phone.customer_id = " + ManageCustomer.findCustomerId();
+        String filter = "Phone.customer_id = " + ManageCustomer.assignCusId();
 
         int numberOfPhoneNums = QueryUtility.tableSize("Phone", filter);
-        int phoneId = getPhoneFromList(numberOfPhoneNums, filter);
+        int phoneId;
+        phoneId = getPhoneFromList(numberOfPhoneNums, filter);
+
 
         System.out.println("What information would you like to update?\n[1]. Phone Number\n[2]. Phone Type");
         int choice = ScannerReader.scannerInt(1, 2);
@@ -51,7 +53,7 @@ public class ManagePhone {
     //Leave no Orphans!!
     public static String deletePhoneQuery() throws SQLException {
         System.out.println("Who owns the phone?");
-        String filter = "Phone.customer_id = " + ManageCustomer.findCustomerId();
+        String filter = "Phone.customer_id = " + ManageCustomer.assignCusId();
         printPhoneList(filter);
 
         int numberOfPhoneNums = QueryUtility.tableSize("Phone", filter);
@@ -89,14 +91,35 @@ public class ManagePhone {
             System.out.println();
         }
     }
-    
+
+    //Searching for phone type only returns the first hit - does it even make sense to search for a phone type?
     public static int findPhoneId() throws SQLException {
         System.out.println("What information would you like to search by?\n[1]. Phone Number\n[2]. Phone Type");
-        String phoneField = ManagePhone.getField(ScannerReader.scannerInt(1,2));
+        String phoneField = getField(ScannerReader.scannerInt(1,2));
         System.out.print("Search: ");
-        String phoneParam = ScannerReader.scannerWords();
 
-        return QueryUtility.extractIntFromString(QueryUtility.findPrimaryKey("Phone", phoneField, phoneParam));
+        String phoneParam;
+        if (phoneField.equalsIgnoreCase(getField(1))) {
+            phoneParam = ScannerReader.scannerIntAsString();
+        } else {
+            phoneParam = ScannerReader.scannerWords();
+        }
+
+
+        String phoneId = QueryUtility.findPrimaryKey("Phone", phoneField, phoneParam);
+        if (phoneId.isEmpty()) {
+            return -1;
+        }
+
+        return QueryUtility.extractIntFromString(phoneId);
+    }
+
+    public static int assignPhoneId() throws SQLException {
+        int phoneId;
+        do {
+            phoneId = findPhoneId();
+        } while (phoneId == -1);
+        return phoneId;
     }
 
     public static int getPhoneFromList(int totalPhones, String filter) throws SQLException {

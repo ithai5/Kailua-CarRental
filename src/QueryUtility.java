@@ -34,8 +34,14 @@ public class QueryUtility {
     //A method used to retrieve the primary key from a table, with whatever
     //WHERE clause is passed in through the fieldName and searchParam parameters.
     public static String findPrimaryKey(String table, String fieldName, String searchParam) throws SQLException {
-        String queryId = "SELECT *\nFROM " + table + "\nWHERE " + fieldName + " = " + searchParam + ";";
+        String queryId = "SELECT *\nFROM " + table + "\nWHERE " + fieldName + " = " + formatValue(searchParam, false) + ";";
+
         ResultSet rs = DBInteraction.getData(queryId);
+
+        if (tableSize(table, fieldName + " = " + formatValue(searchParam, false)) == 0)  {
+            System.out.println("No matches found!\n");
+            return "";
+        }
 
         rs.next();
         return rs.getString(1);

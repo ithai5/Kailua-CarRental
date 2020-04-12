@@ -75,7 +75,12 @@ public class ManageCustomer {
         String cusField = ManageCustomer.getField(ScannerReader.scannerInt(1, 3));
         System.out.print("Search: ");
         String cusParam = ScannerReader.scannerWords();
-        return QueryUtility.extractIntFromString(QueryUtility.findPrimaryKey("Customer", cusField, cusParam));
+
+        String searchHit = QueryUtility.findPrimaryKey("Customer", cusField, cusParam);
+        if (searchHit.isEmpty()) {
+            return -1;
+        }
+        return QueryUtility.extractIntFromString(searchHit);
     }
 
     public static String getField(int fieldName) {
@@ -91,6 +96,14 @@ public class ManageCustomer {
             default:
                 return "gvrbvnzo";
         }
+    }
+
+    public static int assignCusId() throws SQLException {
+        int cusId;
+        do {
+            cusId = ManageCustomer.findCustomerId();
+        } while (cusId == -1);
+        return cusId;
     }
 
 }
